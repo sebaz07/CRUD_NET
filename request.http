@@ -1,0 +1,28 @@
+
+GET http://localhost:5286
+
+###
+GET http://localhost:5286/blogs
+###
+GET http://localhost:5286/blogs/2
+
+###
+POST http://localhost:5286/blogs
+Content-type: application/json
+
+{
+    "title": "My third blog",
+    "body" : "This is my third blog"
+}
+
+###
+DELETE  http://localhost:5286/blogs/4
+
+###
+PUT  http://localhost:5286/blogs/0
+Content-type: application/json
+
+{
+    "title": "My firts updated blog",
+    "body" : "This is my firts updated blog"
+}

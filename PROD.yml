@@ -1,0 +1,60 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+stages:
+- stage: Build
+  displayName: 'Compilación y publicación'
+  jobs:
+  - job: BuildJob
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Instalar SDK .NET 9'
+      inputs:
+        packageType: 'sdk'
+        version: '9.0.201'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore'
+      inputs:
+        command: 'restore'
+        projects: '*.sln'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        command: 'build'
+        projects: 'MySolution.sln'
+        arguments: '--configuration Release'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: '*.csproj'
+        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publicar artefactos'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+
+- stage: Deploy
+  displayName: 'Desplegar a Dev'
+  dependsOn: Build
+  jobs:
+  - deployment: DeployJob
+    displayName: 'Despliegue'
+    environment: myapi-dev
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+
+          - script: echo "Desplegando artefacto a entorno DEV"

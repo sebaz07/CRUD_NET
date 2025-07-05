@@ -80,7 +80,9 @@ stages:
   jobs:
   - deployment: DeployJob
     displayName: 'Despliegue'
-    environment: 7777_myapi-dev
+    environment: 7777_myapi-dev  # Este es el Environment de Azure DevOps
+    variables:
+      ASPNETCORE_ENVIRONMENT: 'Development'
     strategy:
       runOnce:
         deploy:
@@ -88,7 +90,16 @@ stages:
           - download: current
             artifact: drop
 
-          - script: echo "Desplegando artefacto a entorno DEV"
+          - script: echo "Desplegando artefacto a entorno DEV..."
+            env:
+              ASPNETCORE_ENVIRONMENT: $(ASPNETCORE_ENVIRONMENT)
+
+          - script: |
+              echo "Ejecutarías algo como:"
+              echo "dotnet myapp.dll --environment $(ASPNETCORE_ENVIRONMENT)"
+            displayName: "Ejemplo uso de ENV"
+            env:
+              ASPNETCORE_ENVIRONMENT: $(ASPNETCORE_ENVIRONMENT)
 
 - stage: ServiceNow
   displayName: "ServiceNow Change Approval"

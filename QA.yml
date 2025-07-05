@@ -1,0 +1,113 @@
+trigger:
+- qa
+
+pool:
+  vmImage: 'windows-latest'
+
+stages:
+- stage: Build
+  displayName: 'Compilación y publicación'
+  jobs:
+  - job: BuildJob
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Instalar SDK .NET 9'
+      inputs:
+        packageType: 'sdk'
+        version: '9.0.201'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore'
+      inputs:
+        command: 'restore'
+        projects: '*.sln'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        command: 'build'
+        projects: '*.sln'
+        arguments: '--configuration Release'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: '*.csproj'
+        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publicar artefactos'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+
+
+- stage: Sonarqube
+  displayName: "Sonarqube static analysis"
+  dependsOn: Build
+  jobs:
+  - job: SimulateSonarqube
+    displayName: "Simular análisis SonarQube"
+    steps:
+    - script: echo "Simulando análisis estático con SonarQube..."
+      displayName: "Simular SonarQube"
+
+- stage: Veracode
+  displayName: "Veracode SAST"
+  dependsOn: Build
+  jobs:
+  - job: SimulateVeracode
+    displayName: "Simular análisis Veracode"
+    steps:
+    - script: echo "Simulando análisis SAST con Veracode..."
+      displayName: "Simular Veracode"
+
+- stage: JFrog
+  displayName: "JFrog Artifactory"
+  dependsOn: Build
+  jobs:
+  - job: SimulateJFrog
+    displayName: "Simular publicación en JFrog"
+    steps:
+    - script: echo "Simulando publicación de artefactos en JFrog Artifactory..."
+      displayName: "Simular JFrog"
+
+- stage: Deploy
+  displayName: 'Desplegar a QA'
+  dependsOn: Build
+  jobs:
+  - deployment: DeployJob
+    displayName: 'Despliegue'
+    environment: 7777_myapi-qa  # Este es el Environment de Azure DevOps
+    variables:
+      ASPNETCORE_ENVIRONMENT: 'qa'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+
+          - script: echo "Desplegando artefacto a entorno QA..."
+            env:
+              ASPNETCORE_ENVIRONMENT: $(ASPNETCORE_ENVIRONMENT)
+
+          - script: |
+              echo "Ejecutarías algo como:"
+              echo "dotnet myapp.dll --environment $(ASPNETCORE_ENVIRONMENT)"
+            displayName: "Ejemplo uso de ENV"
+            env:
+              ASPNETCORE_ENVIRONMENT: $(ASPNETCORE_ENVIRONMENT)
+
+- stage: ServiceNow
+  displayName: "ServiceNow Change Approval"
+  dependsOn: Build
+  jobs:
+  - job: SimulateServiceNowChange
+    displayName: "Simular creación de change en ServiceNow"
+    steps:
+    - script: echo "Simulando creación de change en ServiceNow... Esperando aprobación."
+      displayName: "Simular creación de change"
+

@@ -91,16 +91,6 @@ stages:
           - script: echo "Desplegando artefacto a entorno DEV"
 
 - stage: ServiceNow
-  displayName: "ServiceNow Integration"
-  dependsOn: Build
-  jobs:
-  - job: SimulateServiceNow
-    displayName: "Simular integración con ServiceNow"
-    steps:
-    - script: echo "Simulando integración con ServiceNow (creación de ticket, notificación, etc.)..."
-      displayName: "Simular ServiceNow"
-
-- stage: ServiceNow
   displayName: "ServiceNow Change Approval"
   dependsOn: Build
   jobs:

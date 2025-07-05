@@ -43,6 +43,37 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'
 
+
+- stage: Sonarqube
+  displayName: "Sonarqube static analysis"
+  dependsOn: Build
+  jobs:
+  - job: SimulateSonarqube
+    displayName: "Simular análisis SonarQube"
+    steps:
+    - script: echo "Simulando análisis estático con SonarQube..."
+      displayName: "Simular SonarQube"
+
+- stage: Veracode
+  displayName: "Veracode SAST"
+  dependsOn: Build
+  jobs:
+  - job: SimulateVeracode
+    displayName: "Simular análisis Veracode"
+    steps:
+    - script: echo "Simulando análisis SAST con Veracode..."
+      displayName: "Simular Veracode"
+
+- stage: JFrog
+  displayName: "JFrog Artifactory"
+  dependsOn: Build
+  jobs:
+  - job: SimulateJFrog
+    displayName: "Simular publicación en JFrog"
+    steps:
+    - script: echo "Simulando publicación de artefactos en JFrog Artifactory..."
+      displayName: "Simular JFrog"
+
 - stage: Deploy
   displayName: 'Desplegar a Dev'
   dependsOn: Build
@@ -58,3 +89,30 @@ stages:
             artifact: drop
 
           - script: echo "Desplegando artefacto a entorno DEV"
+
+- stage: ServiceNow
+  displayName: "ServiceNow Integration"
+  dependsOn: Build
+  jobs:
+  - job: SimulateServiceNow
+    displayName: "Simular integración con ServiceNow"
+    steps:
+    - script: echo "Simulando integración con ServiceNow (creación de ticket, notificación, etc.)..."
+      displayName: "Simular ServiceNow"
+
+- stage: ServiceNow
+  displayName: "ServiceNow Change Approval"
+  dependsOn: Build
+  jobs:
+  - job: SimulateServiceNowChange
+    displayName: "Simular creación de change en ServiceNow"
+    steps:
+    - script: echo "Simulando creación de change en ServiceNow... Esperando aprobación."
+      displayName: "Simular creación de change"
+    # Simulación de espera de aprobación manual
+    - task: ManualValidation@0
+      timeoutInMinutes: 60
+      inputs:
+        notifyUsers: ''
+        instructions: 'Aprobar el change simulado de ServiceNow para continuar con el pipeline.'
+      displayName: 'Esperar aprobación de ServiceNow'

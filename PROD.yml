@@ -80,7 +80,7 @@ stages:
   jobs:
   - deployment: DeployJob
     displayName: 'Despliegue'
-    environment: myapi-dev
+    environment: 7777_myapi-dev
     strategy:
       runOnce:
         deploy:
@@ -95,6 +95,7 @@ stages:
   dependsOn: Build
   jobs:
   - job: SimulateServiceNowChange
+    environment: 7777_myapi-dev
     displayName: "Simular creación de change en ServiceNow"
     steps:
     - script: echo "Simulando creación de change en ServiceNow... Esperando aprobación."

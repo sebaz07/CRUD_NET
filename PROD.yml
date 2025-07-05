@@ -99,10 +99,3 @@ stages:
     steps:
     - script: echo "Simulando creación de change en ServiceNow... Esperando aprobación."
       displayName: "Simular creación de change"
-    # Simulación de espera de aprobación manual
-    - task: ManualValidation@0
-      timeoutInMinutes: 60
-      inputs:
-        notifyUsers: ''
-        instructions: 'Aprobar el change simulado de ServiceNow para continuar con el pipeline.'
-      displayName: 'Esperar aprobación de ServiceNow'

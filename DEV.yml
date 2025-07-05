@@ -1,5 +1,5 @@
 trigger:
-- qa
+- develop
 
 pool:
   vmImage: 'windows-latest'
@@ -75,14 +75,14 @@ stages:
       displayName: "Simular JFrog"
 
 - stage: Deploy
-  displayName: 'Desplegar a QA'
+  displayName: 'Desplegar a Dev'
   dependsOn: Build
   jobs:
   - deployment: DeployJob
     displayName: 'Despliegue'
-    environment: 7777_myapi-QA  # Este es el Environment de Azure DevOps
+    environment: 7777_myapi-DEV  # Este es el Environment de Azure DevOps
     variables:
-      ASPNETCORE_ENVIRONMENT: 'qa'
+      ASPNETCORE_ENVIRONMENT: 'Development'
     strategy:
       runOnce:
         deploy:
@@ -90,7 +90,7 @@ stages:
           - download: current
             artifact: drop
 
-          - script: echo "Desplegando artefacto a entorno QA..."
+          - script: echo "Desplegando artefacto a entorno DEV..."
             env:
               ASPNETCORE_ENVIRONMENT: $(ASPNETCORE_ENVIRONMENT)
 
